@@ -1,0 +1,10 @@
+.DS_Store
+.idea/
+**/.idea/
+**/target/
+**/node_modules/
+**/uploads/
+**/data/*.mv.db
+**/data/*.trace.db
+**/.env
+**/.env.*

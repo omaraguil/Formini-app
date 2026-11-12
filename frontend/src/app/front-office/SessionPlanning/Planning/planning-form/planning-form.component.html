@@ -1,0 +1,538 @@
+<div class="planning-container">
+  <!-- En-tête avec titre et progression -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <span class="title-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/>
+            <path d="M8 2v4M16 2v4M3 10h18" stroke-width="2"/>
+          </svg>
+        </span>
+        <span class="title-text">{{ isEditMode ? 'Modifier le planning' : 'Créer un planning' }}</span>
+      </h1>
+      <p class="page-subtitle">Configurez tous les détails de votre session de formation</p>
+    </div>
+    
+    <div class="header-right">
+      <div class="progress-indicator">
+        <div class="progress-step" [class.completed]="planningForm.get('mode')?.valid">
+          <span class="step-number">1</span>
+          <span class="step-label">Mode</span>
+        </div>
+        <div class="progress-step" [class.completed]="planningForm.get('startDate')?.valid && planningForm.get('endDate')?.valid">
+          <span class="step-number">2</span>
+          <span class="step-label">Dates</span>
+        </div>
+        <div class="progress-step" [class.completed]="planningForm.get('totalHours')?.valid">
+          <span class="step-number">3</span>
+          <span class="step-label">Durée</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout principal -->
+  <div class="main-layout">
+    <!-- Colonne de gauche - Formulaire -->
+    <div class="form-column">
+      <form [formGroup]="planningForm" (ngSubmit)="onSubmit()" class="planning-form">
+        
+        <!-- Carte: Mode de formation -->
+        <div class="form-card">
+          <div class="card-header">
+            <div class="header-with-icon">
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="8" r="4" stroke-width="2"/>
+                  <path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="card-title">
+                <h2>Mode de formation</h2>
+                <p>Choisissez comment se déroulera la formation</p>
+              </div>
+            </div>
+            <span class="required-badge">* Requis</span>
+          </div>
+
+          <div class="card-content">
+            <div class="mode-selector-grid">
+              <button type="button" 
+                      *ngFor="let mode of planningModes" 
+                      class="mode-card" 
+                      [class.active]="planningForm.get('mode')?.value === mode.value"
+                      (click)="planningForm.patchValue({ mode: mode.value })">
+                <span class="mode-icon-large">{{ mode.icon }}</span>
+                <span class="mode-name">{{ mode.label }}</span>
+                <span class="mode-description">{{ getModeDescription(mode.value) }}</span>
+              </button>
+            </div>
+            <div class="field-error" *ngIf="planningForm.get('mode')?.touched && planningForm.get('mode')?.invalid">
+              Veuillez sélectionner un mode de formation
+            </div>
+          </div>
+        </div>
+
+        <!-- Carte: Période et durée -->
+        <div class="form-card">
+          <div class="card-header">
+            <div class="header-with-icon">
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+                  <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
+                  <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="card-title">
+                <h2>Période et durée</h2>
+                <p>Définissez les dates et le volume horaire</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-content">
+            <div class="date-range-picker">
+              <div class="date-field">
+                <label class="field-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+                  </svg>
+                  Date de début
+                </label>
+                <input type="date" 
+                       formControlName="startDate" 
+                       class="date-input"
+                       [class.error]="planningForm.get('startDate')?.touched && planningForm.get('startDate')?.invalid">
+              </div>
+
+              <div class="date-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M5 12h14M12 5l7 7-7 7" stroke-width="2"/>
+                </svg>
+              </div>
+
+              <div class="date-field">
+                <label class="field-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+                  </svg>
+                  Date de fin
+                </label>
+                <input type="date" 
+                       formControlName="endDate" 
+                       class="date-input"
+                       [class.error]="planningForm.get('endDate')?.touched && planningForm.get('endDate')?.invalid">
+              </div>
+            </div>
+
+            <div class="date-error-banner" *ngIf="dateError">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke-width="2"/>
+                <circle cx="12" cy="16" r="1" fill="currentColor"/>
+              </svg>
+              {{ dateError }}
+            </div>
+
+            <div class="hours-field">
+              <label class="field-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+                </svg>
+                Volume horaire total
+              </label>
+              <div class="hours-input-group">
+                <input type="number" 
+                       formControlName="totalHours" 
+                       min="1"
+                       class="hours-input"
+                       placeholder="ex: 35">
+                <span class="hours-unit">heures</span>
+              </div>
+              <div class="field-hint">* Minimum 1 heure</div>
+            </div>
+          </div>
+        </div>
+
+      <div class="form-card" *ngIf="showLocation">
+  <div class="card-header">
+    <div class="header-with-icon">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <!-- Icône pour ONLINE/HYBRID -->
+          <path *ngIf="isOnlineMode || isHybridMode" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="2"/>
+          <!-- Icône pour ONSITE -->
+          <path *ngIf="isOnsiteMode" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"/>
+          <circle *ngIf="isOnsiteMode" cx="12" cy="10" r="3" stroke-width="2"/>
+          <!-- Icône supplémentaire pour ONLINE/HYBRID -->
+          <path *ngIf="isOnlineMode || isHybridMode" d="M12 6v6l4 2" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="card-title">
+        <h2>{{ getLocationSectionTitle() }}</h2>
+        <p>{{ getLocationSectionDescription() }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-content">
+    <!-- Mode ONLINE - Only URL -->
+    <div *ngIf="isOnlineMode" class="url-section">
+      <div class="form-group full-width">
+        <label class="field-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+            <line x1="2" y1="12" x2="22" y2="12" stroke-width="2"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke-width="2"/>
+          </svg>
+          Platform URL <span class="required-star">*</span>
+        </label>
+        <input 
+          type="url" 
+          [formControl]="platformUrlControl!"
+          class="text-input"
+          placeholder="https://zoom.us/j/123456789 or https://teams.microsoft.com/..."
+        >
+        <div class="field-hint">Enter the full URL for the online meeting platform</div>
+        <div class="field-error" *ngIf="platformUrlControl?.touched && platformUrlControl?.invalid">
+          <span *ngIf="platformUrlControl?.errors?.['required']">Platform URL is required</span>
+          <span *ngIf="platformUrlControl?.errors?.['pattern']">Please enter a valid URL (must start with http:// or https://)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode HYBRID - Both URL and Location -->
+    <div *ngIf="isHybridMode" class="hybrid-section">
+      <!-- URL Section for Hybrid -->
+      <div class="hybrid-url">
+        <h4 class="subsection-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+            <line x1="2" y1="12" x2="22" y2="12" stroke-width="2"/>
+          </svg>
+          Online Platform <span class="required-star">*</span>
+        </h4>
+        <div class="form-group full-width">
+          <input 
+            type="url" 
+            [formControl]="platformUrlControl!"
+            class="text-input"
+            placeholder="https://zoom.us/j/123456789"
+          >
+          <div class="field-error" *ngIf="platformUrlControl?.touched && platformUrlControl?.invalid">
+            <span *ngIf="platformUrlControl?.errors?.['required']">Platform URL is required</span>
+            <span *ngIf="platformUrlControl?.errors?.['pattern']">Valid URL required (http:// or https://)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location Section for Hybrid -->
+      <div class="hybrid-location">
+        <h4 class="subsection-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"/>
+            <circle cx="12" cy="10" r="3" stroke-width="2"/>
+          </svg>
+          Physical Location <span class="required-star">*</span>
+        </h4>
+        
+        <!-- Selected location display -->
+        <div class="selected-location" *ngIf="selectedLocation">
+          <div class="location-badge" [style.background-color]="getLocationTypeColor(selectedLocation.type)">
+            <span class="location-icon">{{ getLocationTypeIcon(selectedLocation.type) }}</span>
+            <div class="location-info">
+              <span class="location-name">{{ selectedLocation.name }}</span>
+              <span class="location-address">{{ selectedLocation.address }}, {{ selectedLocation.city }}</span>
+              <span class="location-capacity">Capacity: {{ selectedLocation.capacity }} people</span>
+            </div>
+          </div>
+          <button type="button" class="btn-change-location" (click)="clearSelectedLocation()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M6 18L18 6M6 6l12 12" stroke-width="2"/>
+            </svg>
+            Change
+          </button>
+        </div>
+
+        <!-- Location list -->
+        <div class="locations-list" *ngIf="!selectedLocation">
+          <div class="locations-header">
+            <span class="locations-count">{{ filteredLocations.length }} location(s) available</span>
+            <button type="button" class="btn-create-location" (click)="createNewLocation()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14" stroke-width="2"/>
+              </svg>
+              New Location
+            </button>
+          </div>
+
+          <div class="location-cards">
+            <div class="location-card" 
+                 *ngFor="let location of filteredLocations"
+                 (click)="selectLocation(location)">
+              <div class="location-card-header" [style.background-color]="getLocationTypeColor(location.type) + '20'">
+                <span class="location-type-icon">{{ getLocationTypeIcon(location.type) }}</span>
+                <span class="location-type">{{ getLocationTypeLabel(location.type) }}</span>
+              </div>
+              <div class="location-card-body">
+                <h4 class="location-card-name">{{ location.name }}</h4>
+                <p class="location-card-address">{{ location.address }}</p>
+                <p class="location-card-city">{{ location.city }}</p>
+                <div class="location-card-capacity">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                    <circle cx="9" cy="7" r="4" stroke-width="2"/>
+                  </svg>
+                  {{ location.capacity }} people
+                </div>
+              </div>
+              <div class="location-card-footer">
+                <button type="button" class="btn-select-location">Select</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div class="empty-locations" *ngIf="filteredLocations.length === 0">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="1.5"/>
+              <circle cx="12" cy="10" r="3" stroke-width="1.5"/>
+            </svg>
+            <h4>No locations available</h4>
+            <p>Create a new location for this training</p>
+            <button type="button" class="btn-create-location-empty" (click)="createNewLocation()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14" stroke-width="2"/>
+              </svg>
+              Create Location
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode ONSITE - Only Location -->
+    <div *ngIf="isOnsiteMode">
+      <!-- Selected location display -->
+      <div class="selected-location" *ngIf="selectedLocation">
+        <div class="location-badge" [style.background-color]="getLocationTypeColor(selectedLocation.type)">
+          <span class="location-icon">{{ getLocationTypeIcon(selectedLocation.type) }}</span>
+          <div class="location-info">
+            <span class="location-name">{{ selectedLocation.name }}</span>
+            <span class="location-address">{{ selectedLocation.address }}, {{ selectedLocation.city }}</span>
+            <span class="location-capacity">Capacity: {{ selectedLocation.capacity }} people</span>
+          </div>
+        </div>
+        <button type="button" class="btn-change-location" (click)="clearSelectedLocation()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M6 18L18 6M6 6l12 12" stroke-width="2"/>
+          </svg>
+          Change
+        </button>
+      </div>
+
+      <!-- Location list -->
+      <div class="locations-list" *ngIf="!selectedLocation">
+        <div class="locations-header">
+          <span class="locations-count">{{ filteredLocations.length }} location(s) available</span>
+          <button type="button" class="btn-create-location" (click)="createNewLocation()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 5v14M5 12h14" stroke-width="2"/>
+            </svg>
+            New Location
+          </button>
+        </div>
+
+        <div class="location-cards">
+          <div class="location-card" 
+               *ngFor="let location of filteredLocations"
+               (click)="selectLocation(location)">
+            <div class="location-card-header" [style.background-color]="getLocationTypeColor(location.type) + '20'">
+              <span class="location-type-icon">{{ getLocationTypeIcon(location.type) }}</span>
+              <span class="location-type">{{ getLocationTypeLabel(location.type) }}</span>
+            </div>
+            <div class="location-card-body">
+              <h4 class="location-card-name">{{ location.name }}</h4>
+              <p class="location-card-address">{{ location.address }}</p>
+              <p class="location-card-city">{{ location.city }}</p>
+              <div class="location-card-capacity">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                  <circle cx="9" cy="7" r="4" stroke-width="2"/>
+                </svg>
+                {{ location.capacity }} people
+              </div>
+            </div>
+            <div class="location-card-footer">
+              <button type="button" class="btn-select-location">Select</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-locations" *ngIf="filteredLocations.length === 0">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="1.5"/>
+            <circle cx="12" cy="10" r="3" stroke-width="1.5"/>
+          </svg>
+          <h4>No locations available</h4>
+          <p>Create a new location for this training</p>
+          <button type="button" class="btn-create-location-empty" (click)="createNewLocation()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 5v14M5 12h14" stroke-width="2"/>
+            </svg>
+            Create Location
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <!-- Actions du formulaire -->
+        <div class="form-actions-bar">
+          <button type="button" class="btn-outline" (click)="goBack()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2"/>
+            </svg>
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="planningForm.invalid || isSubmitting">
+            <span *ngIf="!isSubmitting">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke-width="2"/>
+                <polyline points="17 21 17 13 7 13 7 21" stroke-width="2"/>
+              </svg>
+              {{ isEditMode ? 'Mettre à jour le planning' : 'Créer le planning' }}
+            </span>
+            <span *ngIf="isSubmitting" class="loading-spinner">
+              <svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-width="2"/>
+              </svg>
+              Création en cours...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Colonne de droite - Aperçu -->
+    <div class="preview-column">
+      <div class="preview-sticky">
+        <div class="preview-card">
+          <div class="preview-card-header">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="2" stroke-width="2"/>
+              <path d="M22 12c-2.667 4.667-6 7-10 7s-7.333-2.333-10-7c2.667-4.667 6-7 10-7s7.333 2.333 10 7z" stroke-width="2"/>
+            </svg>
+            <h3>Aperçu en direct</h3>
+            <span class="preview-badge">Mise à jour automatique</span>
+          </div>
+
+          <div class="preview-card-content">
+            <!-- En-tête de l'aperçu -->
+            <div class="preview-summary" *ngIf="hasAnyData(); else emptyPreview">
+              <div class="preview-mode-badge" *ngIf="planningForm.get('mode')?.value">
+                <span class="mode-indicator" [class]="planningForm.get('mode')?.value.toLowerCase()">
+                  <span class="indicator-dot"></span>
+                  {{ getModeLabel(planningForm.get('mode')?.value) }}
+                </span>
+              </div>
+
+              <!-- Dates -->
+              <div class="preview-dates" *ngIf="planningForm.get('startDate')?.value || planningForm.get('endDate')?.value">
+                <div class="preview-date-item" *ngIf="planningForm.get('startDate')?.value">
+                  <span class="date-label">Début</span>
+                  <span class="date-value">{{ planningForm.get('startDate')?.value | date:'dd MMMM yyyy' }}</span>
+                </div>
+                <div class="preview-date-item" *ngIf="planningForm.get('endDate')?.value">
+                  <span class="date-label">Fin</span>
+                  <span class="date-value">{{ planningForm.get('endDate')?.value | date:'dd MMMM yyyy' }}</span>
+                </div>
+              </div>
+
+              <!-- Volume horaire -->
+              <div class="preview-hours" *ngIf="planningForm.get('totalHours')?.value">
+                <div class="hours-circle">
+                  <span class="hours-number">{{ planningForm.get('totalHours')?.value }}</span>
+                  <span class="hours-text">heures</span>
+                </div>
+              </div>
+
+              <!-- Lieu sélectionné dans l'aperçu -->
+              <div class="preview-location" *ngIf="selectedLocation">
+                <div class="location-header">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"/>
+                  </svg>
+                  <span>Lieu sélectionné</span>
+                </div>
+                <div class="location-details">
+                  <div class="location-name">{{ selectedLocation.name }}</div>
+                  <div class="location-address">{{ selectedLocation.address }}, {{ selectedLocation.city }}</div>
+                  <div class="location-capacity">Capacité: {{ selectedLocation.capacity }} personnes</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Template vide -->
+            <ng-template #emptyPreview>
+              <div class="preview-empty">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="4" width="18" height="16" rx="2" stroke-width="1.5"/>
+                  <line x1="8" y1="2" x2="8" y2="6" stroke-width="1.5"/>
+                  <line x1="16" y1="2" x2="16" y2="6" stroke-width="1.5"/>
+                </svg>
+                <h4>Votre planning apparaîtra ici</h4>
+                <p>Remplissez le formulaire pour voir un aperçu en temps réel</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Pied de l'aperçu avec récapitulatif -->
+          <div class="preview-card-footer" *ngIf="hasAnyData()">
+            <div class="recap-item">
+              <span class="recap-label">Statut</span>
+              <span class="recap-value status-badge" [class.complete]="planningForm.valid">
+                {{ planningForm.valid ? 'Prêt à créer' : 'Complétez le formulaire' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conseils -->
+        <div class="tips-card">
+          <div class="tips-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" stroke-width="2"/>
+              <line x1="12" y1="12" x2="12" y2="16" stroke-width="2"/>
+              <line x1="12" y1="8" x2="12.01" y2="8" stroke-width="2"/>
+            </svg>
+            <span>Conseils</span>
+          </div>
+          <ul class="tips-list">
+            <li>Les dates doivent être cohérentes (début ≤ fin)</li>
+            <li>Le volume horaire doit être cohérent avec les dates</li>
+            <li>Vérifiez la capacité de la salle</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message de statut -->
+  <div class="global-status-message" *ngIf="statusMessage" [class.success]="statusType === 'success'" [class.error]="statusType === 'error'">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path *ngIf="statusType === 'success'" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      <path *ngIf="statusType === 'error'" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    {{ statusMessage }}
+  </div>
+</div>

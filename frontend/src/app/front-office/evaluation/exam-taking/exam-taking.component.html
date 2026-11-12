@@ -1,0 +1,134 @@
+<!-- Loading state -->
+<div class="loading-state" *ngIf="isLoading">
+  <div class="loader"></div>
+  <p>Vérification de votre session d'examen...</p>
+</div>
+
+<!-- Overlay pour examen non disponible (trop tôt) -->
+<div class="status-overlay" *ngIf="!isLoading && accessStatus === 'WAITING'">
+  <div class="status-card">
+    <div class="status-icon waiting">⏳</div>
+    <h2>Examen non disponible</h2>
+    <p>Cet examen n'est pas encore ouvert.</p>
+    <p>Il sera accessible dans :</p>
+    <div class="countdown-display">{{ formatTime(timeUntilStart) }}</div>
+    <div class="time-info">
+      Début : <strong>{{ startTime | date: "HH:mm" }}</strong>
+    </div>
+    <button class="btn-secondary" routerLink="/dashboard">
+      Retour au Dashboard
+    </button>
+  </div>
+</div>
+
+<!-- Overlay pour session expirée -->
+<div class="status-overlay" *ngIf="!isLoading && accessStatus === 'EXPIRED'">
+  <div class="status-card">
+    <div class="status-icon expired">🚫</div>
+    <h2>Session Expirée</h2>
+    <p>Désolé, la période d'accès à cet examen est terminée.</p>
+    <button class="btn-primary" routerLink="/dashboard">
+      Quitter l'examen
+    </button>
+  </div>
+</div>
+
+<!-- Conteneur principal de l'examen -->
+<div class="exam-taking-container" *ngIf="!isLoading && accessStatus === 'AUTHORIZED' && exam">
+  <!-- En-tête avec titre et timer -->
+  <header class="exam-header">
+    <h1 class="exam-title">{{ exam.title }}</h1>
+    <div class="timer-container" [class]="getTimerColor()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="10" stroke-width="2" />
+        <polyline points="12 6 12 12 16 14" stroke-width="2" />
+      </svg>
+      <span class="timer-value">{{ formatTime(remainingTime) }}</span>
+      <div class="timer-progress">
+        <div class="progress-bar" [style.width.%]="timePercentage"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="exam-layout">
+    <!-- Barre latérale gauche - Navigation par questions -->
+    <aside class="question-sidebar">
+      <div class="sidebar-header">
+        <h3>Questions</h3>
+        <span class="answered-count">{{ getAnsweredCount() }}/{{ exam.questions.length }}</span>
+      </div>
+
+      <div class="questions-nav">
+        <div *ngFor="let question of exam.questions; let i = index" class="question-dot"
+          [class.active]="i === currentIndex" [class.answered]="isQuestionAnswered(question.id)"
+          [class.empty]="!isQuestionAnswered(question.id)" (click)="goToQuestion(i)">
+          <span class="dot-number">{{ i + 1 }}</span>
+        </div>
+      </div>
+
+      <!-- Bouton Terminer dans la sidebar -->
+      <button class="btn-submit-sidebar" (click)="confirmSubmit()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2" />
+          <polyline points="22 4 12 14.01 9 11.01" stroke-width="2" />
+        </svg>
+        Terminer l'examen
+      </button>
+    </aside>
+
+    <!-- Zone centrale - Question en cours -->
+    <main class="question-area">
+      <!-- En-tête de la question -->
+      <div class="question-header">
+        <span class="question-number">Question {{ currentIndex + 1 }} / {{ exam.questions.length }}</span>
+        <span class="question-points">{{ exam.questions[currentIndex].points }} points</span>
+      </div>
+
+      <!-- Énoncé de la question -->
+      <div class="question-text">
+        <h2>{{ exam.questions[currentIndex].question }}</h2>
+      </div>
+
+      <!-- Zone de réponse -->
+      <div class="answer-area">
+        <label for="studentAnswer">Votre réponse :</label>
+        <textarea id="studentAnswer" [value]="getCurrentAnswer()" (input)="updateAnswer($event)"
+          placeholder="Saisissez votre réponse ici..." rows="8"></textarea>
+        <div class="answer-hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10" stroke-width="2" />
+            <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <span>Votre réponse est sauvegardée automatiquement</span>
+        </div>
+      </div>
+
+      <!-- Barre de navigation entre questions -->
+      <div class="navigation-bar">
+        <button class="btn-nav prev" [disabled]="currentIndex === 0" (click)="previousQuestion()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Précédent
+        </button>
+
+        <button class="btn-nav next" (click)="nextQuestion()">
+          <span *ngIf="!isLastQuestion()">Suivant</span>
+          <span *ngIf="isLastQuestion()">Soumettre</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Bouton Terminer en bas (visible seulement sur la dernière question) -->
+      <button class="btn-submit-bottom" *ngIf="isLastQuestion()" (click)="confirmSubmit()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2" />
+          <polyline points="22 4 12 14.01 9 11.01" stroke-width="2" />
+        </svg>
+        Terminer l'examen
+      </button>
+    </main>
+  </div>
+</div>

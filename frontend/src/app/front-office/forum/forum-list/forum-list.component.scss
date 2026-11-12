@@ -1,0 +1,660 @@
+/* LinkedIn-Style Variables */
+:host {
+    --linkedin-blue: #00acc1;
+    --linkedin-blue-dark: #00838f;
+    --linkedin-blue-light: #4dd0e1;
+    --linkedin-bg: #ffffff;
+    --white: #ffffff;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-400: #ced4da;
+    --gray-500: #adb5bd;
+    --gray-600: #6c757d;
+    --gray-700: #495057;
+    --gray-800: #343a40;
+    --gray-900: #212529;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Main Container */
+.linkedin-container {
+    min-height: 100vh;
+    background: var(--linkedin-bg);
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Waves Background Container */
+.waves-bg-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Ensure app-waves fills the container */
+app-waves {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.linkedin-container>*:not(.waves-bg-container) {
+    position: relative;
+    z-index: 1;
+}
+
+/* Left Sidebar */
+.left-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.profile-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-300);
+}
+
+.profile-cover {
+    height: 60px;
+    background: linear-gradient(135deg, var(--linkedin-blue), var(--linkedin-blue-light));
+}
+
+.profile-content {
+    text-align: center;
+    padding: 0 16px 16px;
+    margin-top: -30px;
+}
+
+.profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid var(--white);
+    object-fit: cover;
+    margin-bottom: 12px;
+}
+
+.profile-name {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.profile-role {
+    margin: 0;
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.4;
+}
+
+.profile-stats {
+    display: flex;
+    padding: 12px 0;
+    border-top: 1px solid var(--gray-300);
+}
+
+.stat-item {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--gray-600);
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--linkedin-blue);
+}
+
+.stat-divider {
+    width: 1px;
+    background: var(--gray-300);
+}
+
+.quick-links-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-300);
+}
+
+.quick-links-card h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.quick-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    color: var(--gray-700);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.quick-link:hover {
+    color: var(--linkedin-blue);
+}
+
+.quick-link svg {
+    color: var(--gray-500);
+}
+
+/* Center Feed */
+.center-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.create-post-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-300);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.create-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.create-post-button {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--gray-400);
+    border-radius: 24px;
+    padding: 12px 20px;
+    text-align: left;
+    color: var(--gray-600);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.create-post-button:hover {
+    background: var(--gray-100);
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--gray-600);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--gray-300);
+    border-top-color: var(--linkedin-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Posts Feed */
+.posts-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.post-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-300);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.post-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 0;
+}
+
+.post-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-author-info {
+    flex: 1;
+}
+
+.post-author-name {
+    margin: 0 0 2px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.post-meta {
+    margin: 0;
+    font-size: 12px;
+    color: var(--gray-600);
+}
+
+.post-menu-btn {
+    background: none;
+    border: none;
+    color: var(--gray-600);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.post-menu-btn:hover {
+    background: var(--gray-200);
+}
+
+.post-content {
+    padding: 12px 16px;
+}
+
+.post-title {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    line-height: 1.4;
+}
+
+.post-description {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: var(--gray-700);
+    font-style: italic;
+}
+
+.post-text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--gray-800);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.post-image {
+    width: 100%;
+    overflow: hidden;
+}
+
+.post-image img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+    display: block;
+}
+
+.post-actions {
+    display: flex;
+    padding: 8px 16px 12px;
+    border-top: 1px solid var(--gray-300);
+    gap: 8px;
+}
+
+.action-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--gray-700);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.action-btn:hover {
+    background: var(--gray-200);
+}
+
+.action-btn svg {
+    stroke-width: 1.5;
+    transition: transform 0.2s;
+}
+
+/* Reaction Active States */
+.action-btn.active-like {
+    color: var(--linkedin-blue);
+}
+
+.action-btn.active-like svg {
+    fill: var(--linkedin-blue);
+}
+
+.action-btn.active-dislike {
+    color: #e53935;
+    /* Professional red */
+}
+
+.action-btn.active-dislike svg {
+    fill: #e53935;
+}
+
+/* Animations */
+.action-btn.is-reacting svg {
+    animation: react-pop 0.5s ease;
+}
+
+@keyframes react-pop {
+    0% {
+        transform: scale(1);
+    }
+
+    25% {
+        transform: scale(1.4);
+    }
+
+    50% {
+        transform: scale(0.8);
+    }
+
+    75% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Specifically for dislike (which is rotated) */
+.dislike-btn.is-reacting svg {
+    animation: react-pop-rotate 0.5s ease;
+}
+
+@keyframes react-pop-rotate {
+    0% {
+        transform: rotate(180deg) scale(1);
+    }
+
+    25% {
+        transform: rotate(180deg) scale(1.4);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(0.8);
+    }
+
+    75% {
+        transform: rotate(180deg) scale(1.1);
+    }
+
+    100% {
+        transform: rotate(180deg) scale(1);
+    }
+}
+
+/* Empty State */
+.empty-state {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 60px 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-300);
+}
+
+.empty-state svg {
+    margin-bottom: 20px;
+    opacity: 0.4;
+}
+
+.empty-state h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    color: var(--gray-900);
+}
+
+.empty-state p {
+    margin: 0 0 20px 0;
+    color: var(--gray-600);
+}
+
+.btn-create-empty {
+    background: var(--linkedin-blue);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-create-empty:hover {
+    background: var(--linkedin-blue-dark);
+}
+
+/* Right Sidebar */
+.right-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.events-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-300);
+}
+
+.events-header {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.event-item {
+    display: flex;
+    gap: 12px;
+}
+
+.event-date-badge {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: var(--linkedin-blue);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.event-month {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.event-day {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.event-info {
+    flex: 1;
+}
+
+.event-title {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-900);
+    line-height: 1.3;
+}
+
+.event-location,
+.event-attendees {
+    margin: 0 0 4px 0;
+    font-size: 12px;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.event-location svg,
+.event-attendees svg {
+    flex-shrink: 0;
+}
+
+.see-all-link {
+    display: block;
+    text-align: center;
+    color: var(--linkedin-blue);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.see-all-link:hover {
+    background: var(--gray-100);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .linkedin-container {
+        grid-template-columns: 240px 1fr 280px;
+        gap: 20px;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .linkedin-container {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .left-sidebar,
+    .right-sidebar {
+        display: none;
+    }
+
+    .create-post-card {
+        padding: 12px;
+    }
+
+    .create-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .post-header {
+        padding: 12px 12px 0;
+    }
+
+    .post-content {
+        padding: 12px;
+    }
+
+    .post-actions {
+        padding: 8px 12px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .linkedin-container {
+        padding: 12px;
+    }
+
+    .post-card {
+        border-radius: 0;
+        margin-left: -12px;
+        margin-right: -12px;
+    }
+
+    .action-btn {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .action-btn span {
+        display: none;
+    }
+}
